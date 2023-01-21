@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:useful_toolbox/logic.dart';
+import 'package:useful_toolbox/exceptions.dart';
 
 class PrimeNumberPage extends StatelessWidget {
   final String _title;
@@ -79,7 +79,7 @@ class _NumberInputBodyState extends State<_NumberInputBody> {
             onPressed: () {
               String? dialogMsg;
               try {
-                if (isPrimeNumber(myController.text)) {
+                if (_isPrimeNumber(myController.text)) {
                   dialogMsg = '是質數';
                 } else {
                   dialogMsg = '不是質數';
@@ -113,4 +113,28 @@ class _NumberInputBodyState extends State<_NumberInputBody> {
       ),
     );
   }
+}
+
+// Prime Number Check
+bool _isPrimeNumber(String numStr) {
+  int num;
+  try {
+    num = int.parse(numStr);
+  } on FormatException {
+    throw InputFormatException('須為正整數且介於範圍內');
+  }
+  
+  if (!(1 <= num && num <= 1000000000)) {
+    throw InputFormatException('須為正整數且介於範圍內');
+  }
+
+  if (num == 1) return false;
+  if (num == 2) return true;
+
+  for (int i = 2; i*i <= num; i++) {
+    if (num%i == 0) {
+      return false;
+    }
+  }
+  return true;
 }

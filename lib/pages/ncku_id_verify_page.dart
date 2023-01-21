@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:useful_toolbox/logic.dart';
+import 'package:useful_toolbox/exceptions.dart';
 
 class IdVerifyPage extends StatelessWidget {
   final String title;
@@ -110,7 +110,7 @@ class _IdInputBodyState extends State<_IdInputBody> {
             ),
             onPressed: () {
               try {
-                _updateResult(idVerify(myController.text) ? 1 : 0);
+                _updateResult(_idVerify(myController.text) ? 1 : 0);
               } on InputFormatException catch (e) {
                 setState(() {
                   _errorText = e.cause;
@@ -136,4 +136,50 @@ class _IdInputBodyState extends State<_IdInputBody> {
       ),
     );
   }
+}
+
+
+// NCKU ID verification
+const List<int> idAlphaMap = [0, 1, 2, 3, 4, 4, -1, 6, 7, 8, 9, 0, -1, 2, -1, 3, 4, 5, 6, 7, 8, 9, -1, -1, -1, 2];
+
+bool _validIdFormat(String id) {
+  if (id.length != 9) {
+    return false;
+  }
+  for (int i = 0; i < 9; i++) {
+    int ch = id.codeUnits[i];
+    if ('a'.codeUnits[0] <= ch && ch <= 'z'.codeUnits[0]) {
+      if (i >= 2) {
+        return false;
+      }
+      if (idAlphaMap[ch - 'a'.codeUnits[0]] == -1) {
+        return false;
+      }
+    } else if ('0'.codeUnits[0] <= ch && ch <= '9'.codeUnits[0]) {
+      if (i == 0) {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool _idVerify(String id) {
+  id = id.toLowerCase();
+  if (!_validIdFormat(id)) {
+    throw InputFormatException('學號格式錯誤');
+  }
+  int sum = 0;
+  for (int i = 0;i < 9;i++) {
+    int k = 9 - i;
+    int ch = id.codeUnits[i];
+    if ('a'.codeUnits[0] <= ch && ch <= 'z'.codeUnits[0]) {
+      sum += idAlphaMap[ch - 'a'.codeUnits[0]] * k;
+    } else {
+      sum += (ch - '0'.codeUnits[0]) * k;
+    }
+  }
+  return (sum % 10 == 0);
 }

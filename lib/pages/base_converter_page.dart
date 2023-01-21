@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:useful_toolbox/logic.dart';
+import 'package:useful_toolbox/exceptions.dart';
 
 class BaseConverterPage extends StatelessWidget {
   final String _title;
@@ -139,7 +139,7 @@ class _InputBodyState extends State<_InputBody> {
             String targetBase = targetBaseController.text;
             String src = inputController.text;
             try {
-              resultController.text = baseConvert(src, initBase, targetBase);
+              resultController.text = _baseConvert(src, initBase, targetBase);
             } on InputFormatException catch (e) {
               showDialog(
                 context: context,
@@ -164,4 +164,21 @@ class _InputBodyState extends State<_InputBody> {
       ],
     );
   }
+}
+
+// Base Converter
+String _baseConvert(String src, String initBaseStr, String targetBaseStr) {
+  int initBase = int.parse(initBaseStr);
+  int targetBase = int.parse(targetBaseStr);
+  if (!(2 <= initBase && initBase <= 36) || 
+      !(2 <= targetBase && targetBase <= 36)) {
+    throw InputFormatException('進制必須位於2~36');
+  }
+  int num;
+  try {
+    num = int.parse(src, radix: initBase);
+  } catch (e) {
+    throw InputFormatException('轉換數字有誤');
+  }
+  return num.toRadixString(targetBase);
 }
